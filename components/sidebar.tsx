@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation"
 const sidebarItems = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -38,6 +38,7 @@ export function Sidebar({ className }: { className?: string }) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    router.push('/')
     router.refresh()
   }
 

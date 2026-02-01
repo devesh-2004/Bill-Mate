@@ -37,20 +37,30 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   
-  // Public routes
+  // 1. Auth pages - redirect to dashboard if logged in
   if (
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||
     pathname.startsWith('/auth')
   ) {
     if (user) {
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
     return response
   }
 
-  // Protected routes
-  if (!user && pathname !== '/login' && pathname !== '/register') {
+  // 2. Public marketing pages - allow everyone
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/features') ||
+    pathname.startsWith('/how-it-works') ||
+    pathname.startsWith('/demo')
+  ) {
+      return response
+  }
+
+  // Protected routes (everything else)
+  if (!user) {
      return NextResponse.redirect(new URL('/login', request.url))
   }
 

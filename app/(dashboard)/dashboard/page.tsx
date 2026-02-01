@@ -37,11 +37,11 @@ async function getStats() {
   }
 }
 
-import { getMonthlyRevenue } from "./revenue-actions"
+import { getMonthlyRevenue } from "../revenue-actions"
 import { RevenueChart } from "@/components/revenue-chart"
 import { ProfitLossChart } from "@/components/profit-loss-chart"
 import { AIInsights } from "@/components/ai-insights"
-import { updateOverdueInvoices } from "./status-updater"
+import { updateOverdueInvoices } from "../status-updater"
 
 // ... imports ...
 

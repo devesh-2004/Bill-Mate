@@ -31,8 +31,8 @@ export async function login(prevState: any, formData: FormData) {
     return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath('/dashboard', 'layout')
+  redirect('/dashboard')
 }
 
 export async function signup(prevState: any, formData: FormData) {
@@ -66,6 +66,6 @@ export async function signup(prevState: any, formData: FormData) {
   // Best practice: Postgres Trigger. I won't do it in code unless user asked.
   // The schema has "profiles.id references auth.users".
   
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath('/dashboard', 'layout')
+  redirect('/dashboard')
 }
