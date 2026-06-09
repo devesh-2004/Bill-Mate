@@ -6,15 +6,12 @@ import { ArrowRight, CheckCircle, Zap, Shield, BarChart3, LayoutDashboard, FileT
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
 import { PublicNavbar } from "@/components/public-navbar"
 
 export default function LandingPage() {
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background text-foreground bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50/50 via-background to-background dark:from-indigo-950/20 dark:via-background dark:to-background">
       <PublicNavbar />
-
-
       <main className="flex-1 grid grid-rows-[1fr_auto] lg:grid-cols-2 lg:grid-rows-1 gap-0 p-6 max-w-7xl mx-auto w-full h-[calc(100vh-60px)]">
          
          {/* LEFT CONTENT */}

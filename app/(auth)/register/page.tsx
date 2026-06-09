@@ -1,5 +1,4 @@
 "use client"
-
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { signup } from '../actions'
@@ -15,7 +14,6 @@ const initialState = {
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signup, initialState)
-
   return (
     <Card>
       <CardHeader>

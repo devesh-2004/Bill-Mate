@@ -50,22 +50,34 @@ export async function signup(prevState: any, formData: FormData) {
     return { error: 'Invalid inputs' }
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: {
+        full_name: data.full_name,
+      }
+    }
+  })
 
   if (error) {
     return { error: error.message }
   }
-  
-  // Also create a profile entry? 
-  // Trigger on database side is better, but consistent with instructions.
-  // Schema instructions say "profiles" links to auth.users.
-  // Usually this is done via trigger.
-  // But if we want to add full_name, we can do it here or via trigger.
-  // Supabase Auth sends metadata. Let's assume we use metadata or trigger.
-  // But the instructions "Create the following tables: profiles" suggests we might need to handle it.
-  // Best practice: Postgres Trigger. I won't do it in code unless user asked.
-  // The schema has "profiles.id references auth.users".
+
+  // Fallback: manually insert profile in case DB trigger is missing/disabled
+  if (signUpData?.user) {
+    try {
+      await supabase.from('profiles').insert({
+        id: signUpData.user.id,
+        full_name: data.full_name,
+        email: data.email,
+      })
+    } catch (e) {
+      console.warn("Silent ignore: Profile creation trigger handled this or RLS blocked direct insert:", e)
+    }
+  }
   
   revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
 }
+
