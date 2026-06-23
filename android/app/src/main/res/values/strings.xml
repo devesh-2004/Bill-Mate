@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bill Mate</string>
+    <string name="title_activity_main">Bill Mate</string>
+    <string name="package_name">com.devesh.billmate</string>
+    <string name="custom_url_scheme">com.devesh.billmate</string>
+</resources>
