@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "assets:source": "node scripts/gen-brand-assets.mjs",
+    "assets:generate": "node scripts/gen-brand-assets.mjs && capacitor-assets generate --assetPath assets --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#0a0a0a' --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#0a0a0a'"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -50,6 +52,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
