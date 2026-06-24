@@ -54,8 +54,14 @@ export default async function DashboardLayout({
       </div>
 
       <RealtimeProvider workspaceId={currentWorkspace!.id} />
-      {/* offset clears the iOS notch / Dynamic Island; resolves to 12px on Web/Android */}
-      <Toaster position="top-center" offset="calc(env(safe-area-inset-top) + 12px)" />
+      {/* Capacitor webviews are <600px, so Sonner uses `mobileOffset` (NOT `offset`).
+          The mobile top offset clears the iOS notch/Dynamic Island via env(), with a
+          24px floor so Android (where env()=0) still clears the status bar. */}
+      <Toaster
+        position="top-center"
+        offset={{ top: "calc(env(safe-area-inset-top) + 16px)" }}
+        mobileOffset={{ top: "calc(max(env(safe-area-inset-top), 24px) + 8px)" }}
+      />
       <FlashToasts />
 
       {/* Desktop Sidebar */}
