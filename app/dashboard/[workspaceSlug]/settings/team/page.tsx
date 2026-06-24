@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { InviteMemberDialog } from "./invite-dialog"
 import { MemberActions } from "./member-actions"
+import { BiometricSettings } from "@/components/biometric-settings"
 
 const ROLE_BADGE_STYLE: Record<string, string> = {
   owner: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
@@ -41,6 +42,8 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ w
     .order("joined_at", { ascending: true })
 
   const canManage = currentWorkspace.role === 'owner' || currentWorkspace.role === 'admin'
+
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="space-y-6">
@@ -114,6 +117,9 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ w
           </TableBody>
         </Table>
       </div>
+
+      {/* Security — renders only inside the native app on a biometric-capable device */}
+      <BiometricSettings username={user?.email || user?.id || "billmate-user"} />
 
       <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-sm text-muted-foreground">
         <strong className="text-foreground">Role Permissions:</strong>

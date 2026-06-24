@@ -11,6 +11,7 @@ import { NotificationBell } from "@/components/notification-bell"
 import { GlobalSearch } from "@/components/global-search"
 import { Toaster } from "sonner"
 import { FlashToasts } from "@/components/flash-toasts"
+import { BiometricLock } from "@/components/biometric-lock"
 
 export default async function DashboardLayout({
   children,
@@ -54,6 +55,8 @@ export default async function DashboardLayout({
       </div>
 
       <RealtimeProvider workspaceId={currentWorkspace!.id} />
+      {/* Native-only biometric gate on app launch; renders nothing on Web. */}
+      <BiometricLock />
       {/* Capacitor webviews are <600px, so Sonner uses `mobileOffset` (NOT `offset`).
           The mobile top offset clears the iOS notch/Dynamic Island via env(), with a
           24px floor so Android (where env()=0) still clears the status bar. */}

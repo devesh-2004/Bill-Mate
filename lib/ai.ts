@@ -3,10 +3,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 // Try the configured model first, then fall back to widely-available models so
 // a single unsupported model name doesn't break every AI feature. Override the
 // primary with GEMINI_MODEL in .env.local.
+// gemini-1.5-flash is RETIRED (404 on v1beta) — removed. gemini-flash-latest is
+// an alias that always resolves to a current flash model, so the chain won't rot
+// as versions rotate.
 const MODELS = Array.from(new Set([
   process.env.GEMINI_MODEL || "gemini-2.5-flash",
   "gemini-2.0-flash",
-  "gemini-1.5-flash",
+  "gemini-flash-latest",
 ]))
 
 function getClient() {
@@ -31,7 +34,15 @@ async function generateText(prompt: string): Promise<string> {
       return result.response.text()
     } catch (e: any) {
       lastErr = e
-      console.error(`Gemini model "${modelName}" failed: ${e?.message}`)
+      const msg = e?.message || ''
+      console.error(`Gemini model "${modelName}" failed: ${msg}`)
+      // A quota / rate-limit error is the real blocker. Surface it immediately
+      // instead of falling through to other models, otherwise a later model's
+      // unrelated error masks the true cause (this is exactly why a retired
+      // model's 404 was being shown instead of the underlying 429).
+      if (/\b429\b|quota|RESOURCE_EXHAUSTED|rate limit/i.test(msg)) {
+        throw new Error("Gemini API quota exceeded (HTTP 429). The GEMINI_API_KEY project has no remaining quota — enable billing / a paid tier on that project, or use a key with available quota.")
+      }
     }
   }
   throw new Error(`Gemini request failed (tried ${MODELS.join(', ')}): ${lastErr?.message || 'unknown error'}`)
