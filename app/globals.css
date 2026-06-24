@@ -160,7 +160,11 @@
 /* Existing spacing + iOS safe area */
 
 @utility safe-header {
-  padding-top: calc(0.75rem + env(safe-area-inset-top));
+  /* Notched iOS reports a real top inset via env(). Android (edge-to-edge) and
+     any WebView that resolves env() to 0 fall back to a 1.75rem status-bar
+     floor, so the mobile header never tucks under the status bar on either
+     platform. On Web/Desktop this header is md:hidden, so layout is unaffected. */
+  padding-top: max(calc(0.75rem + env(safe-area-inset-top)), 1.75rem);
 }
 
 @utility safe-panel-top {

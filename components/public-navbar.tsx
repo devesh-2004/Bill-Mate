@@ -9,7 +9,7 @@ export function PublicNavbar() {
     const pathname = usePathname()
 
     return (
-        <nav className="flex items-center justify-between px-6 py-4 border-b bg-background/50 backdrop-blur-md sticky top-0 z-50 h-[60px]">
+        <nav className="flex items-center justify-between px-6 pb-4 pt-[max(calc(1rem+env(safe-area-inset-top)),1.75rem)] md:pt-4 border-b bg-background/50 backdrop-blur-md sticky top-0 z-50 md:h-[60px]">
             <div className="flex items-center gap-2">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">B</div>
