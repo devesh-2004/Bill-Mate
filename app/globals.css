@@ -114,12 +114,59 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ===========================================================================
+   iOS SAFE AREA UTILITIES
+   Works on:
+   - iPhone Notch / Dynamic Island
+   - iPhone without Notch
+   - Android
+   - Desktop browsers
+
+   On Android/Desktop these env() values resolve to 0,
+   so layout remains unchanged.
+   =========================================================================== */
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pl-safe {
+  padding-left: env(safe-area-inset-left);
+}
+
+@utility pr-safe {
+  padding-right: env(safe-area-inset-right);
+}
+
+@utility px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Existing spacing + iOS safe area */
+
+@utility safe-header {
+  padding-top: calc(0.75rem + env(safe-area-inset-top));
+}
+
+@utility safe-panel-top {
+  padding-top: calc(1.5rem + env(safe-area-inset-top));
+}
+
+@utility safe-panel-bottom {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
 }

@@ -35,7 +35,7 @@ export function Sidebar({ className, workspaces = [], currentWorkspaceSlug }: { 
 
   return (
     <div className={cn("pb-12 min-h-screen border-none bg-transparent flex flex-col", className)}>
-      <div className="space-y-6 py-6 flex-1 px-4">
+      <div className="space-y-6 pb-6 safe-panel-top flex-1 px-4">
         <div className="mb-8">
            <WorkspaceSwitcher workspaces={workspaces} currentWorkspaceSlug={currentWorkspaceSlug} />
         </div>

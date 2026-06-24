@@ -43,7 +43,7 @@ export default async function DashboardLayout({
     .limit(30)
 
   return (
-    <div className="relative flex min-h-screen flex-col md:flex-row bg-background dark:bg-[#0a0a0a] text-foreground overflow-hidden">
+    <div className="relative flex min-h-screen flex-col md:flex-row bg-background dark:bg-[#0a0a0a] text-foreground overflow-hidden px-safe">
       {/* Background ambient glow */}
       <div className="fixed inset-0 z-0 pointer-events-none flex justify-center opacity-30 dark:opacity-40">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/20 blur-[120px]" />
@@ -58,9 +58,9 @@ export default async function DashboardLayout({
          <Sidebar workspaces={workspaces} currentWorkspaceSlug={workspaceSlug} />
       </div>
 
-      <div className="flex-1 z-10 flex flex-col h-screen overflow-y-auto">
+      <div className="flex-1 z-10 flex flex-col h-screen overflow-y-auto pb-safe">
         {/* Mobile Header with Hamburger */}
-        <header className="flex items-center justify-between border-b border-border/40 px-4 py-3 md:hidden bg-background/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="flex items-center justify-between border-b border-border/40 px-4 pb-3 safe-header md:hidden bg-background/80 backdrop-blur-md sticky top-0 z-20">
           <MobileSidebar workspaces={workspaces} currentWorkspaceSlug={workspaceSlug} />
           <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
             BillMate

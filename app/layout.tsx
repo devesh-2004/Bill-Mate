@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -16,6 +16,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Bill Mate",
   description: "Bill Mate",
+};
+
+
+
+// viewport-fit=cover is what makes env(safe-area-inset-*) report real values on
+// notched iOS devices. On Web / Android / non-notch iPhones these insets are 0,
+// so the safe-area utilities below stay visual no-ops there.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

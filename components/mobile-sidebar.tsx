@@ -48,7 +48,7 @@ export function MobileSidebar({ workspaces = [], currentWorkspaceSlug }: { works
         className="w-72 p-0 border-r border-border/40 bg-background/95 backdrop-blur-xl"
         showCloseButton={false}
       >
-        <div className="flex flex-col h-full py-6 px-4 space-y-6">
+        <div className="flex flex-col h-full safe-panel-top safe-panel-bottom px-4 space-y-6">
           <div className="flex items-center justify-between">
             <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
               BillMate
