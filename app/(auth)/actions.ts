@@ -2,9 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+
+// Short-lived, client-readable flag the dashboard reads once to toast an auth
+// event (these don't create a notifications row, so they can't use realtime).
+async function setFlash(value: 'login' | 'welcome') {
+  ;(await cookies()).set('bm_flash', value, { path: '/', maxAge: 120, httpOnly: false })
+}
 
 const authSchema = z.object({
   email: z.string().email(),
@@ -31,6 +38,7 @@ export async function login(prevState: any, formData: FormData) {
     return { error: error.message }
   }
 
+  await setFlash('login')
   revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
 }
@@ -76,7 +84,8 @@ export async function signup(prevState: any, formData: FormData) {
       console.warn("Silent ignore: Profile creation trigger handled this or RLS blocked direct insert:", e)
     }
   }
-  
+
+  await setFlash('welcome')
   revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
 }

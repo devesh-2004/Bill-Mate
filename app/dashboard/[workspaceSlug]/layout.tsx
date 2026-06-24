@@ -9,6 +9,8 @@ import { RealtimeProvider } from "@/components/realtime-provider"
 import { MobileSidebar } from "@/components/mobile-sidebar"
 import { NotificationBell } from "@/components/notification-bell"
 import { GlobalSearch } from "@/components/global-search"
+import { Toaster } from "sonner"
+import { FlashToasts } from "@/components/flash-toasts"
 
 export default async function DashboardLayout({
   children,
@@ -52,6 +54,9 @@ export default async function DashboardLayout({
       </div>
 
       <RealtimeProvider workspaceId={currentWorkspace!.id} />
+      {/* offset clears the iOS notch / Dynamic Island; resolves to 12px on Web/Android */}
+      <Toaster position="top-center" offset="calc(env(safe-area-inset-top) + 12px)" />
+      <FlashToasts />
 
       {/* Desktop Sidebar */}
       <div className="hidden md:block w-64 flex-shrink-0 z-10 border-r border-border/40 bg-background/50 backdrop-blur-xl">
