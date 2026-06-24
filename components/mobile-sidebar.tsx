@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, FileText, LogOut, Menu, X, Repeat, Receipt, Sparkles } from "lucide-react"
+import { LayoutDashboard, Users, FileText, LogOut, Menu, X, Repeat, Receipt, Sparkles, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
@@ -26,7 +26,7 @@ export function MobileSidebar({ workspaces = [], currentWorkspaceSlug }: { works
     { title: "Recurring", href: `${basePath}/recurring`, icon: Repeat },
     { title: "Expenses", href: `${basePath}/expenses`, icon: Receipt },
     { title: "Forecast", href: `${basePath}/forecast`, icon: Sparkles },
-    { title: "Team", href: `${basePath}/settings/team`, icon: Users },
+    { title: "Security", href: `${basePath}/settings/security`, icon: ShieldCheck },
   ]
 
   const handleSignOut = async () => {

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, FileText, LogOut, Repeat, Receipt, Sparkles } from "lucide-react"
+import { LayoutDashboard, Users, FileText, LogOut, Repeat, Receipt, Sparkles, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
@@ -24,7 +24,7 @@ export function Sidebar({ className, workspaces = [], currentWorkspaceSlug }: { 
     { title: "Recurring", href: `${basePath}/recurring`, icon: Repeat },
     { title: "Expenses", href: `${basePath}/expenses`, icon: Receipt },
     { title: "Forecast", href: `${basePath}/forecast`, icon: Sparkles },
-    { title: "Team", href: `${basePath}/settings/team`, icon: Users },
+    { title: "Security", href: `${basePath}/settings/security`, icon: ShieldCheck },
   ]
 
   const handleSignOut = async () => {

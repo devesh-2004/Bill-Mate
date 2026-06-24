@@ -1,24 +1,23 @@
-// Biometric unlock helper. Everything here is a no-op on Web — the plugin is
-// only loaded (via dynamic import) on Capacitor native, so the web bundle and
-// SSR are never touched by native code. Supabase auth is NOT modified: the
-// Supabase session persists as normal and biometrics only gate access to the UI.
+// Biometric unlock helper. No-op on Web — the plugin is loaded via dynamic
+// import() ONLY on Capacitor native, so the web bundle and SSR never touch
+// native code. Supabase auth is NOT modified: the session persists as normal;
+// biometrics only gate access to the UI on launch.
 import { Capacitor } from "@capacitor/core"
 
-// Keychain (iOS) / Keystore (Android) entry that marks biometrics as enabled.
-const SERVER = "com.devesh.billmate.biometric"
+// Keychain (iOS) / Keystore (Android) entry holding the user's explicit choice.
+const PREF_SERVER = "com.devesh.billmate.biometric"
 
 export function isNative(): boolean {
   return Capacitor.isNativePlatform()
 }
 
-// Loaded only in the native webview, on demand.
+// Loaded only inside the native webview, on demand.
 async function plugin() {
-  const mod = await import("@capgo/capacitor-native-biometric")
-  return mod
+  return await import("@capgo/capacitor-native-biometric")
 }
 
-/** Is biometric hardware present and enrolled on this device? */
-export async function biometricAvailable(): Promise<boolean> {
+/** Biometric hardware present AND enrolled on this device. */
+export async function biometricSupported(): Promise<boolean> {
   if (!isNative()) return false
   try {
     const { NativeBiometric } = await plugin()
@@ -29,19 +28,7 @@ export async function biometricAvailable(): Promise<boolean> {
   }
 }
 
-/** Has the user opted in (a credential exists in secure storage)? */
-export async function biometricEnabled(): Promise<boolean> {
-  if (!isNative()) return false
-  try {
-    const { NativeBiometric } = await plugin()
-    const creds = await NativeBiometric.getCredentials({ server: SERVER })
-    return !!creds?.username
-  } catch {
-    return false
-  }
-}
-
-/** Human label for buttons: Face ID / Touch ID / Fingerprint. */
+/** Face ID / Touch ID / Fingerprint label for the UI. */
 export async function biometryLabel(): Promise<string> {
   if (!isNative()) return "Biometrics"
   try {
@@ -54,6 +41,10 @@ export async function biometryLabel(): Promise<string> {
         return "Touch ID"
       case BiometryType.FINGERPRINT:
         return "Fingerprint"
+      case BiometryType.FACE_AUTHENTICATION:
+        return "Face Unlock"
+      case BiometryType.IRIS_AUTHENTICATION:
+        return "Iris"
       default:
         return "Biometrics"
     }
@@ -62,36 +53,42 @@ export async function biometryLabel(): Promise<string> {
   }
 }
 
-/** Enable: confirm presence, then store a device-bound secret in the Keychain/Keystore. */
-export async function enableBiometric(username: string): Promise<{ ok: boolean; error?: string }> {
-  if (!isNative()) return { ok: false, error: "Biometrics are only available in the mobile app." }
+/**
+ * ON BY DEFAULT on native when hardware is available. Only an explicit "off"
+ * choice (stored in the Keychain/Keystore) disables it.
+ */
+export async function biometricEnabled(): Promise<boolean> {
+  if (!(await biometricSupported())) return false
   try {
     const { NativeBiometric } = await plugin()
-    const avail = await NativeBiometric.isAvailable()
-    if (!avail.isAvailable) return { ok: false, error: "No biometrics are set up on this device." }
-    // Verify the user is present before turning it on.
-    await NativeBiometric.verifyIdentity({ reason: "Enable biometric unlock for BillMate", title: "Enable Biometrics" })
-    // Store an opaque, device-bound secret in hardware-backed secure storage.
-    const token = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`)
-    await NativeBiometric.setCredentials({ username, password: token, server: SERVER })
-    return { ok: true }
-  } catch (e: any) {
-    return { ok: false, error: e?.message || "Biometric verification failed." }
+    const pref = await NativeBiometric.getCredentials({ server: PREF_SERVER })
+    return pref?.password !== "off"
+  } catch {
+    return true // no explicit choice stored yet → default ON
   }
 }
 
-/** Disable: remove the credential from secure storage. */
-export async function disableBiometric(): Promise<void> {
+/** Persist the user's choice in hardware-backed secure storage. */
+export async function setBiometricEnabled(on: boolean): Promise<void> {
   if (!isNative()) return
   try {
     const { NativeBiometric } = await plugin()
-    await NativeBiometric.deleteCredentials({ server: SERVER })
+    try {
+      await NativeBiometric.deleteCredentials({ server: PREF_SERVER })
+    } catch {
+      /* nothing stored yet */
+    }
+    await NativeBiometric.setCredentials({
+      username: "billmate",
+      password: on ? "on" : "off",
+      server: PREF_SERVER,
+    })
   } catch {
-    /* nothing stored — already disabled */
+    /* ignore */
   }
 }
 
-/** Prompt for Face ID / Touch ID / Fingerprint. On Web this resolves ok (no gate). */
+/** Prompt Face ID / Touch ID / Fingerprint. Resolves ok on Web (no gate). */
 export async function verifyBiometric(): Promise<{ ok: boolean; error?: string }> {
   if (!isNative()) return { ok: true }
   try {
