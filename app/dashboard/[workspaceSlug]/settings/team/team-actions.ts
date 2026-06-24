@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { getWorkspaceBySlug } from '@/lib/workspace'
 import { sendEmail } from '@/lib/email'
+import { createNotification } from '@/lib/notifications'
 
 const APP_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
@@ -63,6 +64,13 @@ export async function inviteMember(workspaceSlug: string, prevState: any, formDa
         `Create your account here to get started: ${APP_URL}/register\n\n` +
         `Once you've signed up, ask them to invite you again and you'll be added automatically.\n\n— ${workspace.name}`,
     })
+    await createNotification(supabase, {
+      workspace_id: workspace.id,
+      type: 'system',
+      title: 'Team member invited',
+      body: `Invitation sent to ${rawData.email}.`,
+      link: `/dashboard/${workspaceSlug}/settings/team`,
+    })
     return {
       error: `No BillMate account exists for "${rawData.email}" yet — we've emailed them an invite to sign up. Re-invite them after they register.`,
       success: false,
@@ -88,6 +96,14 @@ export async function inviteMember(workspaceSlug: string, prevState: any, formDa
   })
 
   if (error) return { error: error.message, success: false }
+
+  await createNotification(supabase, {
+    workspace_id: workspace.id,
+    type: 'system',
+    title: 'Team member joined',
+    body: `${rawData.email} joined the workspace as ${rawData.role}.`,
+    link: `/dashboard/${workspaceSlug}/settings/team`,
+  })
 
   // Notify the added member by email (best-effort; never blocks the invite).
   await sendEmail({

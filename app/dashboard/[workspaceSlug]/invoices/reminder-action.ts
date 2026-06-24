@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentWorkspace } from "@/lib/workspace"
 import { generatePaymentReminderText } from "@/lib/ai"
+import { createNotification } from "@/lib/notifications"
 
 export async function generatePaymentReminder(invoice: any, clientName: string) {
   const result = await generatePaymentReminderText(invoice, clientName)
@@ -36,5 +37,22 @@ export async function markReminderSent(invoiceId: string) {
         .eq("id", invoiceId)
     
     if (error) return { error: error.message }
+
+    // Surface "invoice sent to client" in the bell.
+    const { data: inv } = await supabase
+        .from("invoices")
+        .select("workspace_id, invoice_number")
+        .eq("id", invoiceId)
+        .maybeSingle()
+    if (inv) {
+        await createNotification(supabase, {
+            workspace_id: inv.workspace_id,
+            type: "invoice",
+            title: "Invoice sent",
+            body: `Invoice ${inv.invoice_number} sent to client.`,
+            entity_type: "invoice",
+            entity_id: invoiceId,
+        })
+    }
     return { success: true }
 }

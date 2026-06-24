@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { getCurrentWorkspace, findWorkspace } from '@/lib/workspace'
+import { createNotification } from '@/lib/notifications'
 
 const clientSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -60,6 +61,14 @@ export async function createClientAction(workspaceSlug: string, prevState: any, 
   if (error) {
     return { error: error.message }
   }
+
+  await createNotification(supabase, {
+    workspace_id: workspace.id,
+    type: 'info',
+    title: 'New client added',
+    body: `Client ${rawData.name} added successfully.`,
+    link: `/dashboard/${workspaceSlug}/clients`,
+  })
 
   revalidatePath(`/dashboard/${workspaceSlug}/clients`)
   redirect(`/dashboard/${workspaceSlug}/clients`)

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { findWorkspace } from '@/lib/workspace'
 import { generateForecastText } from '@/lib/ai'
+import { createNotification } from '@/lib/notifications'
 import type { ForecastContent } from '@/lib/types'
 
 /**
@@ -17,6 +18,13 @@ export async function generateForecastAction(workspaceSlug: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
+
+  // AI report notifications are addressed to the triggering user only (avoids
+  // broadcasting transient "started/completed" noise to the whole team).
+  await createNotification(supabase, {
+    workspace_id: workspace.id, user_id: user.id, type: 'system',
+    title: 'AI report started', body: 'Generating your financial forecast…',
+  })
 
   // Gather the financial signals.
   const { data: invoices } = await supabase
@@ -49,7 +57,13 @@ export async function generateForecastAction(workspaceSlug: string) {
     overdueAmount, overdueCount, pendingAmount, pendingCount,
     monthlyRevenue, currency: workspace.currency || 'USD',
   })
-  if (ai.error) return { error: ai.error }
+  if (ai.error) {
+    await createNotification(supabase, {
+      workspace_id: workspace.id, user_id: user.id, type: 'system',
+      title: 'AI report failed', body: 'Forecast generation failed. Please try again.',
+    })
+    return { error: ai.error }
+  }
 
   const content: ForecastContent = {
     cashFlowPrediction: ai.cashFlowPrediction || '',
@@ -64,12 +78,24 @@ export async function generateForecastAction(workspaceSlug: string) {
     report_type: 'forecast',
     content,
   })
-  if (error) return { error: error.message }
+  if (error) {
+    await createNotification(supabase, {
+      workspace_id: workspace.id, user_id: user.id, type: 'system',
+      title: 'AI report failed', body: 'Could not save the forecast. Please try again.',
+    })
+    return { error: error.message }
+  }
 
   await supabase.from('activity_logs').insert({
     workspace_id: workspace.id, user_id: user.id,
     entity_type: 'workspace', entity_id: workspace.id,
     action: 'forecast_generated', metadata: { riskScore: content.riskScore },
+  })
+
+  await createNotification(supabase, {
+    workspace_id: workspace.id, user_id: user.id, type: 'system',
+    title: 'AI report ready', body: 'Your financial forecast has been generated.',
+    link: `/dashboard/${workspaceSlug}/forecast`,
   })
 
   return { content }

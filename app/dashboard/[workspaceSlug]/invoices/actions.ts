@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { getCurrentWorkspace, findWorkspace } from '@/lib/workspace'
+import { createNotification } from '@/lib/notifications'
 
 const itemSchema = z.object({
   description: z.string().min(1),
@@ -131,6 +132,16 @@ export async function createInvoiceAction(workspaceSlug: string, items: any[], p
           metadata: { invoice_number: invoice.invoice_number, total }
       })
   }
+
+  await createNotification(supabase, {
+    workspace_id: workspace.id,
+    type: 'invoice',
+    title: 'Invoice created',
+    body: `Invoice ${invoice.invoice_number} created.`,
+    entity_type: 'invoice',
+    entity_id: invoice.id,
+    link: `/dashboard/${workspaceSlug}/invoices/${invoice.id}`,
+  })
 
   revalidatePath(`/dashboard/${workspaceSlug}/invoices`)
   redirect(`/dashboard/${workspaceSlug}/invoices`)
@@ -278,10 +289,12 @@ export async function markInvoicePaidAction(workspaceSlug: string, invoiceId: st
        return { error: e.message }
     }
 
-    const { error } = await supabase.from('invoices')
+    const { data: paidInvoice, error } = await supabase.from('invoices')
         .update({ status: 'Paid', paid_at: new Date().toISOString() })
         .eq('id', invoiceId)
         .eq('workspace_id', workspace.id)
+        .select('invoice_number')
+        .maybeSingle()
 
     if (error) return { error: error.message }
 
@@ -293,6 +306,15 @@ export async function markInvoicePaidAction(workspaceSlug: string, invoiceId: st
         entity_id: invoiceId,
         action: 'status_changed',
         metadata: { status: 'Paid', paid_at: new Date().toISOString() }
+    })
+
+    await createNotification(supabase, {
+        workspace_id: workspace.id,
+        type: 'payment',
+        title: 'Payment received',
+        body: `Payment received for ${paidInvoice?.invoice_number || 'invoice'}.`,
+        entity_type: 'invoice',
+        entity_id: invoiceId,
     })
 
     revalidatePath(`/dashboard/${workspaceSlug}/invoices`)
