@@ -15,7 +15,7 @@ The project build is successful and ready for deployment.
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `GEMINI_API_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` (Optional, add if you start using admin features, but keep it secure).
+   - `SUPABASE_SERVICE_ROLE_KEY` (**Required** — needed for workspace auto-creation when new users sign up. Without this, new users will be sent to onboarding to create their workspace manually. Copy from Supabase Dashboard → Project Settings → API → service_role key. Keep this secret — never expose it to the browser.).
 6. **Deploy**: Click **"Deploy"**.
 
 ## If Deployment Fails

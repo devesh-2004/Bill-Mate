@@ -59,6 +59,10 @@ export async function getCurrentWorkspace(supabase: SupabaseClient) {
   // 3. Auto-create a default workspace if none exists (new user).
   // Bootstrap op (no membership row yet) → use the service role; owner_id is the
   // verified user, so this is safe.
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Service role key not configured — skip auto-create; user will be sent to onboarding.
+    return null
+  }
   const admin = createAdminClient()
   const { data: newWorkspace, error: createError } = await admin
     .from('workspaces')
@@ -91,7 +95,7 @@ export async function getUserWorkspaces(supabase: SupabaseClient) {
   }
 
   // Auto-create workspace if new user has none (bootstrap → service role).
-  if (!data || data.length === 0) {
+  if ((!data || data.length === 0) && process.env.SUPABASE_SERVICE_ROLE_KEY) {
      const admin = createAdminClient()
      const { data: newWorkspace, error: createError } = await admin
         .from('workspaces')
